@@ -1,495 +1,383 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AIキャリアコーチング・セッション</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.jsライブラリを追加 -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: #030712; }
-        textarea { resize: vertical; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #1f2937; }
-        ::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #4338ca; }
-        .chart-container { position: relative; margin: auto; height: 45vh; width: 90vw; max-width: 500px; }
-        
-        /* アニメーション用のクラス */
-        .fade-in { animation: fadeIn 0.7s ease-in-out forwards; }
-        .fade-out { animation: fadeOut 0.5s ease-in-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }
-
-        /* ローディングスピナーのスタイル */
-        .loader {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #4f46e5;
-            border-bottom-color: transparent;
-            border-radius: 50%;
-            display: inline-block;
-            box-sizing: border-box;
-            animation: rotation 1s linear infinite;
-        }
-        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIキャリアコーチング・セッション</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js（UMD） -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter','Noto Sans JP',sans-serif; background-color:#030712; }
+    textarea { resize: vertical; }
+    ::-webkit-scrollbar { width:8px; }
+    ::-webkit-scrollbar-track { background:#1f2937; }
+    ::-webkit-scrollbar-thumb { background:#4f46e5; border-radius:4px; }
+    ::-webkit-scrollbar-thumb:hover { background:#4338ca; }
+    .chart-container { position:relative; margin:auto; height:45vh; width:90vw; max-width:520px; }
+    .fade-in { animation: fadeIn 0.7s ease-in-out forwards; }
+    .fade-out { animation: fadeOut 0.5s ease-in-out forwards; }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(20px);} to { opacity:1; transform: translateY(0);} }
+    @keyframes fadeOut { from { opacity:1; transform: translateY(0);} to { opacity:0; transform: translateY(-20px);} }
+    .loader { width:50px; height:50px; border:5px solid #4f46e5; border-bottom-color:transparent; border-radius:50%; display:inline-block; box-sizing:border-box; animation: rotation 1s linear infinite; }
+    @keyframes rotation { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
+  </style>
 </head>
 <body class="text-white flex items-center justify-center min-h-screen p-4 font-sans overflow-hidden">
-    
-    <!-- ローディング画面 -->
-    <div id="loader-screen" class="fixed inset-0 bg-gray-900 flex flex-col items-center justify-center z-50 transition-opacity duration-700 ease-in-out">
-        <div class="loader"></div>
-        <p class="mt-4 text-gray-400">最高のあなたを見つける準備をしています...</p>
-    </div>
+  <!-- ローディング画面 -->
+  <div id="loader-screen" class="fixed inset-0 bg-gray-900 flex flex-col items-center justify-center z-50 transition-opacity duration-700 ease-in-out">
+    <div class="loader"></div>
+    <p class="mt-4 text-gray-400">最高のあなたを見つける準備をしています...</p>
+  </div>
 
-    <!-- メインコンテンツ -->
-    <div id="main-content" class="w-full max-w-3xl opacity-0 transition-opacity duration-700">
-        <div class="w-full bg-gray-800/50 backdrop-blur-xl border border-gray-700 rounded-2xl shadow-2xl p-6 sm:p-8">
-            
-            <div id="header" class="mb-6">
-                <!-- イラストとタイトルを横並びにする -->
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-6">
-                    <!-- 画像をテキストロゴに修正 -->
-                    <div class="w-24 h-24 rounded-full shadow-lg border-2 border-indigo-500/50 flex items-center justify-center bg-gray-900">
-                        <span class="text-indigo-300 font-bold text-xl">ラクホン</span>
-                    </div>
-                    <div>
-                        <h1 class="text-3xl sm:text-4xl font-bold text-center sm:text-left mb-2 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400">AI Career Coaching</h1>
-                        <p class="text-center sm:text-left text-gray-400">あなただけの強みと価値観を見つけましょう</p>
-                    </div>
-                </div>
-                <div class="w-full bg-gray-700 rounded-full h-2.5">
-                    <div id="progress-bar" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
-                </div>
-                <p id="progress-text" class="text-center text-sm text-gray-400 mt-2">進捗: 0/50</p>
-            </div>
-
-            <div id="quiz-container">
-                <div class="mb-6 min-h-[120px] flex items-center justify-center p-4">
-                    <p id="question" class="text-xl sm:text-2xl font-medium text-gray-100 text-center leading-relaxed"></p>
-                </div>
-                <textarea id="answer" class="w-full h-36 p-4 bg-gray-900/70 border border-gray-600 rounded-lg text-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-300" placeholder="ここに回答を入力してください..."></textarea>
-                <div class="flex justify-between items-center mt-6">
-                    <button id="back-btn" class="px-6 py-2 bg-gray-700 text-gray-300 font-semibold rounded-lg hover:bg-gray-600 transition-all duration-300 shadow-md disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95">戻る</button>
-                    <button id="next-btn" class="px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 shadow-lg transform active:scale-95">次へ</button>
-                </div>
-            </div>
-
-            <div id="result-container" class="hidden">
-                <h2 class="text-3xl font-bold text-center mb-4 bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-teal-400">セッション完了！</h2>
-                <p class="text-center text-gray-400 mb-8">お疲れ様でした。以下のステップで、あなただけの分析レポートを生成しましょう。</p>
-
-                <div class="space-y-6">
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-200 mb-2">Step 1: 以下の内容をAIに貼り付ける</h3>
-                        <p class="text-sm text-gray-400 mb-2">「魔法の呪文」と「あなたの回答」がセットになっています。下のボタンで全てコピーし、ChatGPTなどのAIに貼り付けてください。</p>
-                        <button id="copy-prompt-btn" class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition shadow-md transform active:scale-95">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-magic" viewBox="0 0 16 16"><path d="M9.5 2.672a.5.5 0 1 0 1 0V.843a.5.5 0 0 0-1 0v1.829Zm4.5.035A.5.5 0 0 0 13.293 2L12 3.293a.5.5 0 1 0 .707.707L14 2.707a.5.5 0 0 0 0-.707ZM7.293 4L8 3.293a.5.5 0 1 0-.707-.707L6.586 3.5a.5.5 0 0 0 0 .707l.707.707a.5.5 0 0 0 .707 0Z M11.464 7.543a.5.5 0 0 0 .707 0l.708-.707a.5.5 0 0 0 0-.707l-.708-.708a.5.5 0 0 0-.707 0l-.707.708a.5.5 0 0 0 0 .707l.707.707Zm-3.172 4.16a.5.5 0 0 0 0 .707l.707.708a.5.5 0 0 0 .707 0l.708-.707a.5.5 0 0 0 0-.707l-.708-.708a.5.5 0 0 0-.707 0l-.707.707Zm-3.83-2.825a.5.5 0 1 0 0-1H2.843a.5.5 0 0 0 0 1h1.829Zm-1.25.707a.5.5 0 0 0 0 .708l.707.707a.5.5 0 0 0 .708 0l.707-.707a.5.5 0 0 0 0-.708L4.207 9.5a.5.5 0 0 0-.707 0Z M1 8a7 7 0 1 1 14 0A7 7 0 0 1 1 8Zm7-6a6 6 0 1 0 0 12A6 6 0 0 0 8 2Z"/></svg>
-                            魔法の呪文と回答をコピー
-                        </button>
-                        <div class="hidden">
-                            <pre id="all-answers"></pre>
-                            <p id="magic-prompt"></p>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-200 mb-2">Step 2: AIの分析結果を貼り付けて反映</h3>
-                        <p class="text-sm text-gray-400 mb-2">AIが生成したレポート全文を下のボックスに貼り付け、「分析結果を反映」ボタンを押してください。</p>
-                        <textarea id="ai-response-input" class="w-full h-48 p-4 bg-gray-900/70 border border-gray-600 rounded-lg text-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-300" placeholder="ここにAIの分析結果を貼り付け..."></textarea>
-                        <button id="render-chart-btn" class="mt-2 w-full flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition shadow-md transform active:scale-95">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bar-chart-line-fill" viewBox="0 0 16 16"><path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1V2z"/></svg>
-                            分析結果を反映
-                        </button>
-                    </div>
-                </div>
-
-                <div id="chart-area" class="mt-8 hidden">
-                    <h2 class="text-2xl font-bold text-center mb-2 text-gray-200">あなたの強みレーダーチャート</h2>
-                    <p class="text-center text-gray-400 mb-4 text-sm">あなたのスコアと平均スコアを比較し、強みを確認しましょう。</p>
-                    <div class="chart-container">
-                        <canvas id="radarChart"></canvas>
-                    </div>
-                </div>
-                
-                <div id="chart-analysis-area" class="mt-8 hidden">
-                    <h2 class="text-2xl font-bold text-center mb-4 text-gray-200">チャート分析結果</h2>
-                    <div id="chart-analysis-text" class="p-4 bg-gray-900/70 border border-gray-600 rounded-lg text-gray-300 leading-relaxed whitespace-pre-wrap"></div>
-                </div>
-            </div>
+  <!-- メインコンテンツ -->
+  <div id="main-content" class="w-full max-w-3xl opacity-0 transition-opacity duration-700">
+    <div class="w-full bg-gray-800/50 backdrop-blur-xl border border-gray-700 rounded-2xl shadow-2xl p-6 sm:p-8">
+      <div id="header" class="mb-6">
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-6">
+          <div class="w-24 h-24 rounded-full shadow-lg border-2 border-indigo-500/50 flex items-center justify-center bg-gray-900">
+            <span class="text-indigo-300 font-bold text-xl">ラクホン</span>
+          </div>
+          <div>
+            <h1 class="text-3xl sm:text-4xl font-bold text-center sm:text-left mb-2 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400">AI Career Coaching</h1>
+            <p class="text-center sm:text-left text-gray-400">あなただけの強みと価値観を見つけましょう</p>
+          </div>
         </div>
-        <!-- フッターにクレジットを追加 -->
-        <footer class="text-center text-gray-600 text-xs mt-4">
-            Created by Rakuhon
-        </footer>
+        <div class="w-full bg-gray-700 rounded-full h-2.5">
+          <div id="progress-bar" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2.5 rounded-full transition-all duration-500" style="width:0%"></div>
+        </div>
+        <p id="progress-text" class="text-center text-sm text-gray-400 mt-2">進捗: 0/50</p>
+      </div>
+
+      <div id="quiz-container">
+        <div class="mb-6 min-h-[120px] flex items-center justify-center p-4">
+          <p id="question" class="text-xl sm:text-2xl font-medium text-gray-100 text-center leading-relaxed"></p>
+        </div>
+        <textarea id="answer" class="w-full h-36 p-4 bg-gray-900/70 border border-gray-600 rounded-lg text-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-300" placeholder="ここに回答を入力してください..."></textarea>
+        <div class="flex justify-between items-center mt-6">
+          <button id="back-btn" class="px-6 py-2 bg-gray-700 text-gray-300 font-semibold rounded-lg hover:bg-gray-600 transition-all duration-300 shadow-md disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95">戻る</button>
+          <button id="next-btn" class="px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 shadow-lg transform active:scale-95">次へ</button>
+        </div>
+      </div>
+
+      <div id="result-container" class="hidden">
+        <h2 class="text-3xl font-bold text-center mb-4 bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-teal-400">セッション完了！</h2>
+        <p class="text-center text-gray-400 mb-8">お疲れ様でした。以下のステップで、あなただけの分析レポートを生成しましょう。</p>
+        <div class="space-y-6">
+          <div>
+            <h3 class="text-lg font-semibold text-gray-200 mb-2">Step 1: 以下の内容をAIに貼り付ける</h3>
+            <p class="text-sm text-gray-400 mb-2">「魔法の呪文」と「あなたの回答」がセットになっています。下のボタンで全てコピーし、ChatGPTなどのAIに貼り付けてください。</p>
+            <button id="copy-prompt-btn" class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition shadow-md transform active:scale-95">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-magic" viewBox="0 0 16 16"><path d="M9.5 2.672a.5.5 0 1 0 1 0V.843a.5.5 0 0 0-1 0v1.829Zm4.5.035A.5.5 0 0 0 13.293 2L12 3.293a.5.5 0 1 0 .707.707L14 2.707a.5.5 0 0 0 0-.707ZM7.293 4L8 3.293a.5.5 0 1 0-.707-.707L6.586 3.5a.5.5 0 0 0 0 .707l.707.707a.5.5 0 0 0 .707 0Z M11.464 7.543a.5.5 0 0 0 .707 0l.708-.707a.5.5 0 0 0 0-.707l-.708-.708a.5.5 0 0 0-.707 0l-.707.708a.5.5 0 0 0 0 .707l.707.707Zm-3.172 4.16a.5.5 0 0 0 0 .707l.707.708a.5.5 0 0 0 .707 0l.708-.707a.5.5 0 0 0 0-.707l-.708-.708a.5.5 0 0 0-.707 0l-.707.707Zm-3.83-2.825a.5.5 0 1 0 0-1H2.843a.5.5 0 0 0 0 1h1.829Zm-1.25.707a.5.5 0 0 0 0 .708l.707.707a.5.5 0 0 0 .708 0l.707-.707a.5.5 0 0 0 0-.708L4.207 9.5a.5.5 0 0 0-.707 0Z M1 8a7 7 0 1 1 14 0A7 7 0 0 1 1 8Zm7-6a6 6 0 1 0 0 12A6 6 0 0 0 8 2Z"/></svg>
+              魔法の呪文と回答をコピー
+            </button>
+            <div class="hidden">
+              <pre id="all-answers"></pre>
+              <p id="magic-prompt"></p>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-200 mb-2">Step 2: AIの分析結果を貼り付けて反映</h3>
+            <p class="text-sm text-gray-400 mb-2">AIが生成したレポート全文を下のボックスに貼り付け、「分析結果を反映」ボタンを押してください。</p>
+            <textarea id="ai-response-input" class="w-full h-48 p-4 bg-gray-900/70 border border-gray-600 rounded-lg text-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-300" placeholder="ここにAIの分析結果を貼り付け..."></textarea>
+            <button id="render-chart-btn" class="mt-2 w-full flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition shadow-md transform active:scale-95">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bar-chart-line-fill" viewBox="0 0 16 16"><path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1V2z"/></svg>
+              分析結果を反映
+            </button>
+          </div>
+        </div>
+
+        <div id="chart-area" class="mt-8 hidden">
+          <h2 class="text-2xl font-bold text-center mb-2 text-gray-200">あなたの強みレーダーチャート</h2>
+          <p class="text-center text-gray-400 mb-4 text-sm">あなたのスコアと平均スコアを比較し、強みを確認しましょう。</p>
+          <div class="chart-container">
+            <canvas id="radarChart"></canvas>
+          </div>
+        </div>
+
+        <div id="chart-analysis-area" class="mt-8 hidden">
+          <h2 class="text-2xl font-bold text-center mb-4 text-gray-200">チャート分析結果</h2>
+          <div id="chart-analysis-text" class="p-4 bg-gray-900/70 border border-gray-600 rounded-lg text-gray-300 leading-relaxed whitespace-pre-wrap"></div>
+        </div>
+      </div>
     </div>
+    <footer class="text-center text-gray-600 text-xs mt-4">Created by Rakuhon</footer>
+  </div>
 
-    <!-- メッセージ表示用のコンテナ -->
-    <div id="message-box" class="fixed top-5 right-5 bg-red-600 text-white py-2 px-5 rounded-lg shadow-lg opacity-0 transform -translate-y-5 z-50 transition-all duration-500">
-        <p id="message-text"></p>
-    </div>
+  <!-- メッセージ表示用のコンテナ -->
+  <div id="message-box" class="fixed top-5 right-5 bg-red-600 text-white py-2 px-5 rounded-lg shadow-lg opacity-0 transform -translate-y-5 z-50 transition-all duration-500">
+    <p id="message-text"></p>
+  </div>
 
-    <script>
-        const questions = [
-            { group: "知識・経験", text: "子どもの頃から続けてきたこと・得意だったことは？", example: "例：一日中、空想の物語をノートに書き綴っていました。登場人物の細かい設定を考えるのが特に好きでした。" },
-            { group: "知識・経験", text: "学生時代に周りからよく質問された分野は？", example: "例：友人から「このパソコンの調子が悪いんだけど…」とよく頼まれていました。原因を突き止めて解決するのが得意でした。" },
-            { group: "知識・経験", text: "社会人になってから特に時間を投資した学びや経験は？", example: "例：営業職でしたがデータ分析の重要性を感じ、毎週末カフェに通って統計学の本を3冊読破し、独学で分析スキルを習得しました。" },
-            { group: "知識・経験", text: "趣味や日常で、気づいたら詳しくなっていたテーマは？", example: "例：最初は健康のためだったランニングが、いつの間にかシューズの性能やトレーニング理論まで語れるようになっていた。" },
-            { group: "知識・経験", text: "他人より知識や経験が厚いと感じる領域は？", example: "例：〇〇業界のニッチな分野における顧客動向。3年間担当し、主要な顧客とはほとんど顔見知りです。" },
-            { group: "実績（資格・数字）", text: "取得した資格や免許・合格した検定は？", example: "例：基本情報技術者試験。実務経験はなかったが、半年間毎日2時間勉強して一発で合格しました。" },
-            { group: "実績（資格・数字）", text: "受賞・表彰・社内アワードなどは？", example: "例：部署内の改善提案コンテストで、業務効率を20%改善するアイデアを提案し、最優秀賞を受賞した。" },
-            { group: "実績（資格・数字）", text: "数字で語れる成果（売上/成約率/作品数/SNS等）は？", example: "例：担当地域の売上を前年比150%に引き上げた。そのために顧客リストを全面的に見直し、アプローチ方法を改善した。" },
-            { group: "実績（資格・数字）", text: "最近の小さな達成でもOK。自分なりに誇れる実績は？", example: "例：これまで三日坊主だった英語学習を、アプリを使って100日間継続できたこと。TOEICのスコアも50点上がった。" },
-            { group: "実績（資格・数字）", text: "成果を裏付ける記録（ポートフォリオ/レポート等）は？", example: "例：個人で運営しているブログ。月間1万PVを達成し、いくつかの記事は検索1位を獲得している。" },
-            { group: "人よりできること", text: "他の人が苦労するのに自然にできることは？", example: "例：大勢の人が参加する会議でも、それぞれの意見を整理して、話の交通整理をすることが苦にならない。" },
-            { group: "人よりできること", text: "よく褒められるスキル（要約/段取り/傾聴/事務力等）は？", example: "例：上司から「君の議事録は、要点がまとまっていて後から見返しやすい」とよく言われる。" },
-            { group: "人よりできること", text: "どんな状況で得意が発揮されやすい？（初対面/混乱時 等）", example: "例：複数のタスクが同時に発生して混乱している状況で、冷静に優先順位をつけて一つずつ片付けていくこと。" },
-            { group: "人よりできること", text: "直感で「ここは強い」と思う領域は？", example: "例：理屈は分からないが、新しいWebサービスを触った時に「これは流行るな」とか「ここの使い勝手が悪いな」というのが直感的に分かる。" },
-            { group: "人よりできること", text: "得意を支える習慣や工夫（ツール/テンプレ/仕組み）は？", example: "例：毎週日曜の夜に、次の1週間のタスクを全て洗い出してスケジュール帳に落とし込む習慣がある。" },
-            { group: "克服したこと", text: "昔は苦手だったが、今は改善できたことは？", example: "例：昔は人前で話すのが大の苦手で声が震えていたが、今では30人の前でも落ち着いてプレゼンできるようになった。" },
-            { group: "克服したこと", text: "克服のために実施した練習・仕組み・工夫は？", example: "例：プレゼン資料を声に出して何度も読み返し、時間を計る練習を繰り返した。当日は「完璧じゃなくていい」と自分に言い聞かせた。" },
-            { group: "克服したこと", text: "挫折しかけた時、どう乗り越えた？支えは？", example: "例：練習でうまくいかず諦めかけた時、先輩が「最初はみんなそんなものだよ」と声をかけてくれて、もう少し頑張ろうと思えた。" },
-            { group: "克服したこと", text: "今ふり返ると、鍵になった一言・気付きは？", example: "例：「うまく話そうとするのではなく、ただ伝えようとすればいい」という本の一節を読んで、肩の力が抜けた。" },
-            { group: "克服したこと", text: "克服後に得られた成果や変化は？", example: "例：プレゼンを評価され、大きなプロジェクトのリーダーを任されるようになった。自分に自信が持てるようになった。" },
-            { group: "相談・依頼・称賛", text: "人からよく相談されるテーマは？", example: "例：後輩から「キャリアについて悩んでいるのですが…」と、将来についての相談をよく持ちかけられる。" },
-            { group: "相談・依頼・称賛", text: "どんな依頼（作業/アドバイス）をされることが多い？", example: "例：「この企画書、ロジックが通っているか客観的な意見を聞かせてほしい」と壁打ち相手を頼まれることが多い。" },
-            { group: "相談・依頼・称賛", text: "嬉しかった称賛の言葉は？", example: "例：プロジェクト完了後、チームメンバーから「あなたがいなければ、このプロジェクトはまとまらなかった」と言われたこと。" },
-            { group: "相談・依頼・称賛", text: "あなたが周囲に提供している価値は？", example: "例：複雑に絡み合った問題を、冷静に構造化して解決への道筋を示すこと。チームの羅針盤のような役割。" },
-            { group: "相談・依頼・称賛", text: "相談や依頼が起きやすい場面（職場/オンライン/友人等）は？", example: "例：職場のランチタイムなど、少しリラックスした雑談の中から自然と相談に発展することが多い。" },
-            { group: "没頭できること", text: "時間を忘れて没頭できる活動は？", example: "例：週末に、新しいレシピに挑戦して料理をしている時。気づいたら3時間経っていることがある。" },
-            { group: "没頭できること", text: "没頭の理由（快感/達成/発見/身体感覚等）は？", example: "例：試行錯誤しながら、自分の手でイメージ通りのものが完成していくプロセスそのものが楽しい。達成感がたまらない。" },
-            { group: "没頭できること", text: "子どもの頃から夢中になっている遊び・趣味は？", example: "例：レゴブロック。説明書通りに作るのではなく、自分で考えたオリジナルの建物や乗り物を作るのが好きだった。" },
-            { group: "没頭できること", text: "没頭のスイッチが入りやすい環境（場所/時間帯）は？", example: "例：家族が寝静まった深夜、一人でデスクに向かい、好きな音楽を小さな音でかけている時。" },
-            { group: "没頭できること", text: "他人から「熱量がすごい」と言われる活動は？", example: "例：好きな映画について語り始めると止まらなくなり、友人から「その情熱、仕事に活かせば？」と呆れられる。" },
-            { group: "学びたいこと", text: "今後、時間やお金をかけて学びたいテーマは？", example: "例：動画編集スキル。自分の知識や経験を、もっと分かりやすく多くの人に届けられるようになりたい。" },
-            { group: "学びたいこと", text: "その学びで手に入れたい未来（状態）は？", example: "例：自分のオンライン講座を作成し、場所に縛られずに収入を得られる状態。家族と過ごす時間を増やしたい。" },
-            { group: "学びたいこと", text: "短期（1〜3ヶ月）で試したい学習計画は？", example: "例：まずはUdemyで評価の高い動画編集講座を1つ購入し、週末に3時間ずつ学習を進める。簡単な自己紹介動画を完成させるのが目標。" },
-            { group: "学びたいこと", text: "参考にしている人物/メディア/教材は？", example: "例：YouTubeチャンネル「〇〇」。専門的な内容を、初心者にも分かりやすく解説してくれるので、いつも見ている。" },
-            { group: "学びたいこと", text: "学びを習慣化する工夫（時間/場所/仲間）は？", example: "例：毎朝30分だけ、と時間を決めて学習する。SNSで「#今日の積み上げ」とハッシュタグをつけて進捗を報告し、モチベーションを維持する。" },
-            { group: "心地よいこと", text: "心が落ち着く瞬間や状態は？（環境・光・音・匂い）", example: "例：雨の日に、部屋で温かいコーヒーを飲みながら読書をしている時。雨音とコーヒーの香りに癒される。" },
-            { group: "心地よいこと", text: "一緒にいると心地よい相手のタイプは？", example: "例：自分の知らないことを楽しそうに話してくれる人。知的好奇心を刺激されるし、こちらも安心して自分の好きなことを話せる。" },
-            { group: "心地よいこと", text: "自分らしく振るまえるコミュニティの条件は？", example: "例：年齢や役職に関係なく、お互いを「さん付け」で呼び合い、フラットに意見を言い合える場所。" },
-            { group: "心地よいこと", text: "「これが整うと調子が上がる」生活要素は？", example: "例：朝起きてすぐに15分間、瞑想をする習慣。これをすると、一日中、頭がスッキリして集中力が続く。" },
-            { group: "心地よいこと", text: "心地よさと生産性のバランスをどう最適化している？", example: "例：ポモドーロテクニックを使い、25分集中したら5分必ず休憩する。無理せず、自分の集中力の波に乗るようにしている。" },
-            { group: "本当はやりたくないこと", text: "我慢して続けているが避けたい作業は？", example: "例：細かい数値を何度も確認するだけの、創造性のないデータ入力作業。集中力が続かず、ミスも多くなる。" },
-            { group: "本当はやりたくないこと", text: "苦手な理由（疲労/成果が低い/価値観ズレ等）は？", example: "例：自分の強みである「全体像を捉えて戦略を立てる」能力が全く活かせず、誰でもできる仕事だと感じてしまい、モチベーションが湧かないから。" },
-            { group: "本当はやりたくないこと", text: "やめにくい背景（責任/慣習/関係/不安）は？", example: "例：チームの中で自分しかその作業の担当者がおらず、「自分がやらなければ」という責任感で続けてしまっている。" },
-            { group: "本当はやりたくないこと", text: "最小コストで減らす代替案・自動化は？", example: "例：単純な入力作業は、RPAツールやExcelマクロを組んで自動化できないか検討する。まずは30分だけ調べてみる。" },
-            { group: "本当はやりたくないこと", text: "やめたら生まれる余白を何に使いたい？", example: "例：その作業にかけていた週3時間を、新しい企画を考えるための情報収集や、顧客へのヒアリングの時間に使いたい。" },
-            { group: "制限なければやりたいこと", text: "時間とお金が無限ならまず何をする？", example: "例：世界中の図書館を巡る旅に出たい。特に歴史的な建築様式の図書館で、一日中本に囲まれて過ごしてみたい。" },
-            { group: "制限なければやりたいこと", text: "誰のどんな課題を解決したい？", example: "例：過去の自分のように、自分の強みが分からずキャリアに悩んでいる若手社員の相談に乗り、彼らが自信を持って働けるよう支援したい。" },
-            { group: "制限なければやりたいこと", text: "理想の1日の過ごし方（起床〜就寝）は？", example: "例：午前中は集中して自分のプロジェクトを進め、午後はカフェで人と会って新しいアイデアの壁打ちをし、夜は家族とゆっくり食事を楽しむ。" },
-            { group: "制限なければやりたいこと", text: "5年後の「最高の状態」を具体的に。", example: "例：自分の専門分野で本を1冊出版している。仕事の半分はリモートで、年に1回は海外でワーケーションをしている。心身ともに健康で、新しい挑戦にワクワクしている。" },
-            { group: "制限なければやりたいこと", text: "明日から踏み出せる最初の小さな一歩は？", example: "例：5年後の最高の状態を、手帳の最初のページに書き出してみる。そして、そのために今月できることを3つだけ決める。" },
-        ];
+  <script>
+    // ---- Chart.js 必須登録（UMDでも安全に）----
+    try {
+      if (window.Chart && Array.isArray(window.Chart.registerables)) {
+        window.Chart.register(...window.Chart.registerables);
+      }
+    } catch (e) {
+      console.warn('Chart.js registerables の登録に失敗しました:', e);
+    }
 
-        const loaderScreen = document.getElementById('loader-screen');
-        const mainContent = document.getElementById('main-content');
-        const progressBar = document.getElementById('progress-bar');
-        const progressText = document.getElementById('progress-text');
-        const questionEl = document.getElementById('question');
-        const answerEl = document.getElementById('answer');
-        const nextBtn = document.getElementById('next-btn');
-        const backBtn = document.getElementById('back-btn');
-        const quizContainer = document.getElementById('quiz-container');
-        const resultContainer = document.getElementById('result-container');
-        const allAnswersEl = document.getElementById('all-answers');
-        const magicPromptEl = document.getElementById('magic-prompt');
-        const copyPromptBtn = document.getElementById('copy-prompt-btn');
-        const aiResponseInput = document.getElementById('ai-response-input');
-        const renderChartBtn = document.getElementById('render-chart-btn');
-        const chartArea = document.getElementById('chart-area');
-        const radarChartCanvas = document.getElementById('radarChart');
-        const messageBox = document.getElementById('message-box');
-        const messageText = document.getElementById('message-text');
-        const chartAnalysisArea = document.getElementById('chart-analysis-area');
-        const chartAnalysisText = document.getElementById('chart-analysis-text');
-        
-        let currentQuestionIndex = 0;
-        const userAnswers = new Array(questions.length).fill('');
-        let chartInstance = null;
+    const questions = [
+      { group: "知識・経験", text: "子どもの頃から続けてきたこと・得意だったことは？", example: "例：一日中、空想の物語をノートに書き綴っていました。登場人物の細かい設定を考えるのが特に好きでした。" },
+      { group: "知識・経験", text: "学生時代に周りからよく質問された分野は？", example: "例：友人から『このパソコンの調子が悪いんだけど…』とよく頼まれていました。原因を突き止めて解決するのが得意でした。" },
+      { group: "知識・経験", text: "社会人になってから特に時間を投資した学びや経験は？", example: "例：営業職でしたがデータ分析の重要性を感じ、毎週末カフェに通って統計学の本を3冊読破し、独学で分析スキルを習得しました。" },
+      { group: "知識・経験", text: "趣味や日常で、気づいたら詳しくなっていたテーマは？", example: "例：最初は健康のためだったランニングが、いつの間にかシューズの性能やトレーニング理論まで語れるようになっていた。" },
+      { group: "知識・経験", text: "他人より知識や経験が厚いと感じる領域は？", example: "例：〇〇業界のニッチな分野における顧客動向。3年間担当し、主要な顧客とはほとんど顔見知りです。" },
+      { group: "実績（資格・数字）", text: "取得した資格や免許・合格した検定は？", example: "例：基本情報技術者試験。実務経験はなかったが、半年間毎日2時間勉強して一発で合格しました。" },
+      { group: "実績（資格・数字）", text: "受賞・表彰・社内アワードなどは？", example: "例：部署内の改善提案コンテストで、業務効率を20%改善するアイデアを提案し、最優秀賞を受賞した。" },
+      { group: "実績（資格・数字）", text: "数字で語れる成果（売上/成約率/作品数/SNS等）は？", example: "例：担当地域の売上を前年比150%に引き上げた。そのために顧客リストを全面的に見直し、アプローチ方法を改善した。" },
+      { group: "実績（資格・数字）", text: "最近の小さな達成でもOK。自分なりに誇れる実績は？", example: "例：これまで三日坊主だった英語学習を、アプリを使って100日間継続できたこと。TOEICのスコアも50点上がった。" },
+      { group: "実績（資格・数字）", text: "成果を裏付ける記録（ポートフォリオ/レポート等）は？", example: "例：個人で運営しているブログ。月間1万PVを達成し、いくつかの記事は検索1位を獲得している。" },
+      { group: "人よりできること", text: "他の人が苦労するのに自然にできることは？", example: "例：大勢の会議でも意見を整理し、話の交通整理をすることが苦にならない。" },
+      { group: "人よりできること", text: "よく褒められるスキル（要約/段取り/傾聴/事務力等）は？", example: "例：上司から『君の議事録は要点がまとまっていて後から見返しやすい』と言われる。" },
+      { group: "人よりできること", text: "どんな状況で得意が発揮されやすい？（初対面/混乱時 等）", example: "例：複数タスクで混乱していても優先順位をつけて一つずつ片付けられる。" },
+      { group: "人よりできること", text: "直感で『ここは強い』と思う領域は？", example: "例：新しいWebサービスに触れた時、流行りそう・使い勝手の弱点が直感的に分かる。" },
+      { group: "人よりできること", text: "得意を支える習慣や工夫（ツール/テンプレ/仕組み）は？", example: "例：毎週日曜夜に翌週のタスクを洗い出してスケジュールに落とし込む習慣がある。" },
+      { group: "克服したこと", text: "昔は苦手だったが、今は改善できたことは？", example: "例：人前で話すのが苦手だったが、今では30人の前でも落ち着いて話せる。" },
+      { group: "克服したこと", text: "克服のために実施した練習・仕組み・工夫は？", example: "例：資料を声に出して読み、時間を計って練習。『完璧じゃなくていい』と自分に言い聞かせた。" },
+      { group: "克服したこと", text: "挫折しかけた時、どう乗り越えた？支えは？", example: "例：先輩の『最初はみんなそんなもの』の一言で粘れた。" },
+      { group: "克服したこと", text: "今ふり返ると、鍵になった一言・気付きは？", example: "例：『うまく話すより、伝える』という本の一節で肩の力が抜けた。" },
+      { group: "克服したこと", text: "克服後に得られた成果や変化は？", example: "例：評価が上がり、プロジェクトリーダーを任されるようになった。" },
+      { group: "相談・依頼・称賛", text: "人からよく相談されるテーマは？", example: "例：後輩からキャリア相談を受けることが多い。" },
+      { group: "相談・依頼・称賛", text: "どんな依頼（作業/アドバイス）が多い？", example: "例：企画書のロジックの壁打ちを頼まれる。" },
+      { group: "相談・依頼・称賛", text: "嬉しかった称賛の言葉は？", example: "例：『あなたがいなければ、このプロジェクトはまとまらなかった』と言われた。" },
+      { group: "相談・依頼・称賛", text: "あなたが周囲に提供している価値は？", example: "例：複雑な問題を構造化し、解決への道筋を示す。" },
+      { group: "相談・依頼・称賛", text: "相談や依頼が起きやすい場面は？", example: "例：職場のランチタイムなど緩い雑談から相談に発展しやすい。" },
+      { group: "没頭できること", text: "時間を忘れて没頭できる活動は？", example: "例：週末の料理。新しいレシピに挑戦していると数時間経っている。" },
+      { group: "没頭できること", text: "没頭の理由（快感/達成/発見/身体感覚等）は？", example: "例：自分の手で形にしていくプロセスが楽しい。" },
+      { group: "没頭できること", text: "子どもの頃から夢中の遊び・趣味は？", example: "例：レゴでオリジナルの建物や乗り物を作るのが好きだった。" },
+      { group: "没頭できること", text: "没頭スイッチが入りやすい環境（場所/時間帯）は？", example: "例：深夜の静かな時間、好きな音楽を小さな音で流している時。" },
+      { group: "没頭できること", text: "他人から『熱量がすごい』と言われる活動は？", example: "例：好きな映画を語り始めると止まらない。" },
+      { group: "学びたいこと", text: "今後、時間やお金をかけて学びたいテーマは？", example: "例：動画編集スキル。知識を分かりやすく多くの人に届けたい。" },
+      { group: "学びたいこと", text: "その学びで手に入れたい未来は？", example: "例：オンライン講座を作成し、場所に縛られず収入を得る。" },
+      { group: "学びたいこと", text: "短期（1〜3ヶ月）で試したい学習計画は？", example: "例：週末に3時間ずつ学ぶ。自己紹介動画を完成させる。" },
+      { group: "学びたいこと", text: "参考にしている人物/メディア/教材は？", example: "例：初心者にも分かりやすい解説チャンネル。" },
+      { group: "学びたいこと", text: "学びを習慣化する工夫は？", example: "例：毎朝30分の学習＋SNSで進捗共有。" },
+      { group: "心地よいこと", text: "心が落ち着く瞬間や状態は？（環境・光・音・匂い）", example: "例：雨の日にコーヒーと読書。" },
+      { group: "心地よいこと", text: "一緒にいると心地よい相手のタイプは？", example: "例：楽しそうに知識を話す人。" },
+      { group: "心地よいこと", text: "自分らしく振るまえるコミュニティの条件は？", example: "例：フラットに意見できる場。" },
+      { group: "心地よいこと", text: "『これが整うと調子が上がる』生活要素は？", example: "例：朝の15分瞑想。" },
+      { group: "心地よいこと", text: "心地よさと生産性のバランスをどう最適化？", example: "例：ポモドーロで休憩を確保。" },
+      { group: "本当はやりたくないこと", text: "我慢して続けているが避けたい作業は？", example: "例：創造性のない定型入力。" },
+      { group: "本当はやりたくないこと", text: "苦手な理由（疲労/成果が低い/価値観ズレ等）は？", example: "例：強みを活かせずモチベが湧かない。" },
+      { group: "本当はやりたくないこと", text: "やめにくい背景（責任/慣習/関係/不安）は？", example: "例：自分しか担当者がいない。" },
+      { group: "本当はやりたくないこと", text: "最小コストで減らす代替案・自動化は？", example: "例：RPAやマクロで自動化。" },
+      { group: "本当はやりたくないこと", text: "やめたら生まれる余白は何に使う？", example: "例：情報収集や顧客ヒアリング。" },
+      { group: "制限なければやりたいこと", text: "時間とお金が無限ならまず何をする？", example: "例：世界の図書館巡り。" },
+      { group: "制限なければやりたいこと", text: "誰のどんな課題を解決したい？", example: "例：強みが分からず悩む若手の支援。" },
+      { group: "制限なければやりたいこと", text: "理想の1日の過ごし方（起床〜就寝）は？", example: "例：午前は集中作業、午後は壁打ち、夜は家族と食事。" },
+      { group: "制限なければやりたいこと", text: "5年後の『最高の状態』を具体的に。", example: "例：専門分野で出版、年1回海外ワーケーション、心身ともに健康。" },
+      { group: "制限なければやりたいこと", text: "明日から踏み出せる最初の一歩は？", example: "例：5年後の状態を手帳に書く→今月やる3つを決める。" },
+    ];
 
-        function showMessage(message, type = 'error') {
-            messageText.textContent = message;
-            messageBox.className = 'fixed top-5 right-5 text-white py-2 px-5 rounded-lg shadow-lg opacity-0 transform -translate-y-5 z-50 transition-all duration-500'; // Reset classes
-            if (type === 'success') {
-                messageBox.classList.add('bg-green-600');
-            } else {
-                messageBox.classList.add('bg-red-600');
+    // 要素参照
+    const loaderScreen = document.getElementById('loader-screen');
+    const mainContent = document.getElementById('main-content');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    const questionEl = document.getElementById('question');
+    const answerEl = document.getElementById('answer');
+    const nextBtn = document.getElementById('next-btn');
+    const backBtn = document.getElementById('back-btn');
+    const quizContainer = document.getElementById('quiz-container');
+    const resultContainer = document.getElementById('result-container');
+    const allAnswersEl = document.getElementById('all-answers');
+    const magicPromptEl = document.getElementById('magic-prompt');
+    const copyPromptBtn = document.getElementById('copy-prompt-btn');
+    const aiResponseInput = document.getElementById('ai-response-input');
+    const renderChartBtn = document.getElementById('render-chart-btn');
+    const chartArea = document.getElementById('chart-area');
+    const radarChartCanvas = document.getElementById('radarChart');
+    const messageBox = document.getElementById('message-box');
+    const messageText = document.getElementById('message-text');
+    const chartAnalysisArea = document.getElementById('chart-analysis-area');
+    const chartAnalysisText = document.getElementById('chart-analysis-text');
+
+    let currentQuestionIndex = 0;
+    const userAnswers = new Array(questions.length).fill('');
+    let chartInstance = null;
+
+    function showMessage(message, type = 'error') {
+      messageText.textContent = message;
+      messageBox.className = 'fixed top-5 right-5 text-white py-2 px-5 rounded-lg shadow-lg opacity-0 transform -translate-y-5 z-50 transition-all duration-500';
+      messageBox.classList.add(type === 'success' ? 'bg-green-600' : 'bg-red-600');
+      setTimeout(() => { messageBox.classList.add('opacity-100','translate-y-0'); }, 10);
+      setTimeout(() => { messageBox.classList.remove('opacity-100','translate-y-0'); }, 3000);
+    }
+
+    function displayQuestion() {
+      const currentQuestion = questions[currentQuestionIndex];
+      const questionWrapper = questionEl;
+      questionWrapper.classList.remove('fade-in');
+      questionWrapper.classList.add('fade-out');
+      setTimeout(() => {
+        questionWrapper.textContent = `Q${currentQuestionIndex + 1}. ${currentQuestion.text}`;
+        answerEl.value = userAnswers[currentQuestionIndex];
+        answerEl.placeholder = currentQuestion.example || 'ここに回答を入力してください...';
+        updateProgress();
+        backBtn.disabled = currentQuestionIndex === 0;
+        nextBtn.textContent = currentQuestionIndex === questions.length - 1 ? '結果を見る' : '次へ';
+        questionWrapper.classList.remove('fade-out');
+        questionWrapper.classList.add('fade-in');
+      }, 500);
+    }
+
+    function updateProgress() {
+      const progressPercentage = (currentQuestionIndex / questions.length) * 100;
+      progressBar.style.width = `${progressPercentage}%`;
+      progressText.textContent = `進捗: ${currentQuestionIndex}/${questions.length}`;
+    }
+
+    function showResults() {
+      progressBar.style.width = '100%';
+      progressText.textContent = `進捗: ${questions.length}/${questions.length}`;
+      quizContainer.classList.add('fade-out');
+      setTimeout(() => {
+        quizContainer.classList.add('hidden');
+        resultContainer.classList.remove('hidden');
+        resultContainer.classList.add('fade-in');
+      }, 500);
+
+      let formattedAnswers = "--- あなたの回答 ---\n\n";
+      questions.forEach((q, index) => {
+        formattedAnswers += `■ ${q.group} Q${index + 1}. ${q.text}\n`;
+        formattedAnswers += `A. ${userAnswers[index] || '（未回答）'}\n\n`;
+      });
+      allAnswersEl.textContent = formattedAnswers;
+
+      magicPromptEl.textContent = `あなたはMBTIやストレングスファインダーのように、人の特性を深く分析する世界最高峰のキャリア戦略家です。以下の自己分析データを基に、マークダウン形式で詳細な分析レポートを作成してください。\n\nレポートの構成は必ず以下の5つの項目を順番に含めてください。\n\n1.  **キャリアタイプ診断**:\n    * この人物に最もふさわしい、ユニークでキャッチーな「キャリアタイプ名」を創作してください。（例：「共感を力に変える戦略家」「静かなる効率化の鬼」）\n    * そのキャリアタイプの概要を1〜2文で説明してください。\n\n2.  **あなたの強み（レーダーチャート用データ）**:\n    * 以下の5つの特性について、この人物の能力を0〜100点で評価してください。\n    * 必ず、\`[RADAR_CHART_DATA]戦略性:XX,関係構築力:XX,継続力:XX,効率化志向:XX,挑戦心:XX[/RADAR_CHART_DATA]\` という形式で1行で出力してください。XXには点数を入れてください。\n    * 比較対象として「平均的なビジネスパーソンのスコア」も算出してください。\n    * 必ず、\`[RADAR_CHART_AVERAGE]戦略性:XX,関係構築力:XX,継続力:XX,効率化志向:XX,挑戦心:XX[/RADAR_CHART_AVERAGE]\` という形式で1行で出力してください。\n\n3.  **レーダーチャート分析**:\n    * 5つのスコアについて、特に平均と比較して何が言えるかを解説してください。\n    * 最も突出している強みは何か、それをキャリアにどう活かせるかを具体的に説明してください。\n\n4.  **詳細分析**:\n    * **強み**: 回答から読み取れる具体的な強みを3〜5点。\n    * **価値観**: 3〜5点。\n    * **提供できる価値**: どのような価値を提供できるか具体的に。\n\n5.  **おすすめのキャリアジャンル**:\n    * 「①お金」「②人間関係」「③美容・健康」の3つの中から最適を1つ選び、「経験・資産」「価値観」「興味・行動」の観点で理由を詳述してください。\n\n--- 自己分析データ ---\n`;
+    }
+
+    function copyToClipboard(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); showMessage('コピーしました！','success'); }
+      catch(e){ console.error(e); showMessage('コピーに失敗しました。'); }
+      finally { document.body.removeChild(ta); }
+    }
+
+    function renderRadarChart(userData, averageData) {
+      if (!radarChartCanvas) { showMessage('キャンバス要素が見つかりません。'); return; }
+      const ctx = radarChartCanvas.getContext('2d');
+      if (!ctx) { showMessage('2Dコンテキストを取得できませんでした。'); return; }
+      if (chartInstance) { try { chartInstance.destroy(); } catch(_){} }
+      chartArea.classList.remove('hidden');
+      chartArea.classList.add('fade-in');
+      chartInstance = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: userData.labels,
+          datasets: [
+            {
+              label: 'あなたのスコア',
+              data: userData.values,
+              backgroundColor: 'rgba(79, 70, 229, 0.2)',
+              borderColor: 'rgba(99, 102, 241, 1)',
+              pointBackgroundColor: 'rgba(99, 102, 241, 1)',
+              pointBorderColor: '#fff',
+              pointHoverBackgroundColor: '#fff',
+              pointHoverBorderColor: 'rgba(99, 102, 241, 1)'
+            },
+            {
+              label: '平均スコア',
+              data: averageData.values,
+              backgroundColor: 'rgba(107, 114, 128, 0.2)',
+              borderColor: 'rgba(156, 163, 175, 1)',
+              pointBackgroundColor: 'rgba(156, 163, 175, 1)',
+              pointBorderColor: '#fff',
+              pointHoverBackgroundColor: '#fff',
+              pointHoverBorderColor: 'rgba(156, 163, 175, 1)'
             }
-            
-            setTimeout(() => {
-                messageBox.classList.add('opacity-100', 'translate-y-0');
-            }, 10);
-
-            setTimeout(() => {
-                messageBox.classList.remove('opacity-100', 'translate-y-0');
-            }, 3000);
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              angleLines: { color: 'rgba(255,255,255,0.2)' },
+              grid: { color: 'rgba(255,255,255,0.2)' },
+              pointLabels: { color: '#fff', font: { size: 14 } },
+              ticks: { color: 'rgba(255,255,255,0.7)', backdropColor: 'transparent', stepSize: 20 },
+              suggestedMin: 0,
+              suggestedMax: 100
+            }
+          },
+          plugins: { legend: { position: 'bottom', labels: { color: 'white', font: { size: 14 } } } }
         }
+      });
+    }
 
-        function displayQuestion() {
-            const currentQuestion = questions[currentQuestionIndex];
-            
-            const questionWrapper = document.getElementById('question');
-            questionWrapper.classList.remove('fade-in');
-            questionWrapper.classList.add('fade-out');
+    function parseChartData(dataStr) {
+      const labels = []; const values = [];
+      const pairs = dataStr.split(',');
+      pairs.forEach(pair => {
+        const [label, value] = pair.split(':');
+        if (label && value) { labels.push(label.trim()); values.push(parseInt(value.trim(), 10)); }
+      });
+      if (labels.length === 5 && values.every(v => Number.isFinite(v))) { return { labels, values }; }
+      return null;
+    }
 
-            setTimeout(() => {
-                questionWrapper.textContent = `Q${currentQuestionIndex + 1}. ${currentQuestion.text}`;
-                answerEl.value = userAnswers[currentQuestionIndex];
-                answerEl.placeholder = currentQuestion.example || 'ここに回答を入力してください...';
-                updateProgress();
-                backBtn.disabled = currentQuestionIndex === 0;
-                nextBtn.textContent = currentQuestionIndex === questions.length - 1 ? '結果を見る' : '次へ';
-                questionWrapper.classList.remove('fade-out');
-                questionWrapper.classList.add('fade-in');
-            }, 500);
-        }
+    function extractAnalysisSection(responseText, sectionTitle) {
+      const startMarker = `### ${sectionTitle}`;
+      const startIndex = responseText.indexOf(startMarker);
+      if (startIndex === -1) return null;
+      const nextSectionIndex = responseText.indexOf('### ', startIndex + startMarker.length);
+      const sectionText = nextSectionIndex !== -1 ? responseText.substring(startIndex + startMarker.length, nextSectionIndex) : responseText.substring(startIndex + startMarker.length);
+      return sectionText.trim();
+    }
 
-        function updateProgress() {
-            const progressPercentage = ((currentQuestionIndex) / questions.length) * 100;
-            progressBar.style.width = `${progressPercentage}%`;
-            progressText.textContent = `進捗: ${currentQuestionIndex}/${questions.length}`;
-        }
+    // --- イベント ---
+    nextBtn.addEventListener('click', () => {
+      userAnswers[currentQuestionIndex] = answerEl.value;
+      if (currentQuestionIndex < questions.length - 1) { currentQuestionIndex++; displayQuestion(); answerEl.focus(); }
+      else { showResults(); }
+    });
 
-        function showResults() {
-            progressBar.style.width = '100%';
-            progressText.textContent = `進捗: ${questions.length}/${questions.length}`;
-            
-            quizContainer.classList.add('fade-out');
-            setTimeout(() => {
-                quizContainer.classList.add('hidden');
-                resultContainer.classList.remove('hidden');
-                resultContainer.classList.add('fade-in');
-            }, 500);
-            
-            let formattedAnswers = "--- あなたの回答 ---\n\n";
-            questions.forEach((q, index) => {
-                formattedAnswers += `■ ${q.group} Q${index + 1}. ${q.text}\n`;
-                formattedAnswers += `A. ${userAnswers[index] || '（未回答）'}\n\n`;
-            });
-            allAnswersEl.textContent = formattedAnswers;
+    backBtn.addEventListener('click', () => {
+      if (currentQuestionIndex > 0) { userAnswers[currentQuestionIndex] = answerEl.value; currentQuestionIndex--; displayQuestion(); }
+    });
 
-            magicPromptEl.textContent = `あなたはMBTIやストレングスファインダーのように、人の特性を深く分析する世界最高峰のキャリア戦略家です。以下の自己分析データを基に、マークダウン形式で詳細な分析レポートを作成してください。
+    copyPromptBtn.addEventListener('click', () => {
+      const promptText = magicPromptEl.textContent + allAnswersEl.textContent;
+      copyToClipboard(promptText);
+    });
 
-レポートの構成は必ず以下の5つの項目を順番に含めてください。
+    renderChartBtn.addEventListener('click', () => {
+      const aiResponse = aiResponseInput.value;
+      if (!aiResponse) { showMessage('分析結果を貼り付けてください。'); return; }
+      const userRegex = /\[RADAR_CHART_DATA\](.*?)\[\/RADAR_CHART_DATA\]/s;
+      const averageRegex = /\[RADAR_CHART_AVERAGE\](.*?)\[\/RADAR_CHART_AVERAGE\]/s;
+      const userMatch = aiResponse.match(userRegex);
+      const averageMatch = aiResponse.match(averageRegex);
+      if (userMatch && userMatch[1] && averageMatch && averageMatch[1]) {
+        const userData = parseChartData(userMatch[1]);
+        const averageData = parseChartData(averageMatch[1]);
+        if (userData && averageData) {
+          renderRadarChart(userData, averageData);
+          const analysisText = extractAnalysisSection(aiResponse, 'レーダーチャート分析');
+          if (analysisText) { chartAnalysisText.textContent = analysisText; chartAnalysisArea.classList.remove('hidden'); chartAnalysisArea.classList.add('fade-in'); }
+          else { chartAnalysisArea.classList.add('hidden'); }
+          showMessage('チャートと分析が反映されました！','success');
+        } else { showMessage('チャートデータの形式が正しくありません。'); }
+      } else { showMessage('AIの回答からチャートデータが見つかりませんでした。'); }
+    });
 
-1.  **キャリアタイプ診断**:
-    * この人物に最もふさわしい、ユニークでキャッチーな「キャリアタイプ名」を創作してください。（例：「共感を力に変える戦略家」「静かなる効率化の鬼」）
-    * そのキャリアタイプの概要を1〜2文で説明してください。
-
-2.  **あなたの強み（レーダーチャート用データ）**:
-    * 以下の5つの特性について、この人物の能力を0〜100点で評価してください。
-    * 必ず、\`[RADAR_CHART_DATA]戦略性:XX,関係構築力:XX,継続力:XX,効率化志向:XX,挑戦心:XX[/RADAR_CHART_DATA]\` という形式で1行で出力してください。XXには点数を入れてください。
-    * 同時に、比較対象として「平均的なビジネスパーソンのスコア」も算出してください。
-    * 必ず、\`[RADAR_CHART_AVERAGE]戦略性:XX,関係構築力:XX,継続力:XX,効率化志向:XX,挑戦心:XX[/RADAR_CHART_AVERAGE]\` という形式で1行で出力してください。
-
-3.  **レーダーチャート分析**:
-    * レーダーチャートの5つのスコアについて、特に平均スコアと比較して何が言えるかを解説してください。
-    * 最も突出している強みは何か、そしてそれがキャリアにどう活かせるかを具体的に説明してください。
-
-4.  **詳細分析**:
-    * **強み**: 回答から読み取れる具体的な強みを3〜5点挙げてください。
-    * **価値観**: この人物が何を大切にしているかを3〜5点挙げてください。
-    * **提供できる価値**: 社会や他者に対して、どのような価値を提供できるかを具体的に記述してください。
-
-5.  **おすすめのキャリアジャンル**:
-    * 「①お金」「②人間関係」「③美容・健康」の3つの中から、この人物のポテンシャルが最も発揮されるジャンルを1つだけ選び、その理由を「経験・資産」「価値観」「興味・行動」の観点から詳細に説明してください。
-
---- 自己分析データ ---\n`;
-        }
-        
-        function copyToClipboard(text, button) {
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                showMessage('コピーしました！', 'success');
-            } catch (err) {
-                console.error('コピーに失敗しました', err);
-                showMessage('コピーに失敗しました。');
-            }
-            document.body.removeChild(textArea);
-        }
-
-        function renderRadarChart(userData, averageData) {
-            if (chartInstance) {
-                chartInstance.destroy();
-            }
-            chartArea.classList.remove('hidden');
-            chartArea.classList.add('fade-in');
-            const ctx = radarChartCanvas.getContext('2d');
-            chartInstance = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: userData.labels,
-                    datasets: [
-                        {
-                            label: 'あなたのスコア',
-                            data: userData.values,
-                            backgroundColor: 'rgba(79, 70, 229, 0.2)',
-                            borderColor: 'rgba(99, 102, 241, 1)',
-                            pointBackgroundColor: 'rgba(99, 102, 241, 1)',
-                            pointBorderColor: '#fff',
-                            pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: 'rgba(99, 102, 241, 1)'
-                        },
-                        {
-                            label: '平均スコア',
-                            data: averageData.values,
-                            backgroundColor: 'rgba(107, 114, 128, 0.2)',
-                            borderColor: 'rgba(156, 163, 175, 1)',
-                            pointBackgroundColor: 'rgba(156, 163, 175, 1)',
-                            pointBorderColor: '#fff',
-                            pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: 'rgba(156, 163, 175, 1)'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            angleLines: { color: 'rgba(255, 255, 255, 0.2)' },
-                            grid: { color: 'rgba(255, 255, 255, 0.2)' },
-                            pointLabels: { color: '#fff', font: { size: 14 } },
-                            ticks: {
-                                color: 'rgba(255, 255, 255, 0.7)',
-                                backdropColor: 'transparent',
-                                stepSize: 20
-                            },
-                            suggestedMin: 0,
-                            suggestedMax: 100
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { color: 'white', font: { size: 14 } }
-                        }
-                    }
-                }
-            });
-        }
-
-        function parseChartData(dataStr) {
-            const labels = [];
-            const values = [];
-            const pairs = dataStr.split(',');
-            pairs.forEach(pair => {
-                const [label, value] = pair.split(':');
-                if (label && value) {
-                    labels.push(label.trim());
-                    values.push(parseInt(value.trim(), 10));
-                }
-            });
-            if (labels.length === 5 && values.every(v => !isNaN(v))) {
-                return { labels, values };
-            }
-            return null;
-        }
-
-        function extractAnalysisSection(responseText, sectionTitle) {
-            const startMarker = `### ${sectionTitle}`;
-            const startIndex = responseText.indexOf(startMarker);
-            if (startIndex === -1) {
-                return null;
-            }
-            
-            const nextSectionIndex = responseText.indexOf("### ", startIndex + startMarker.length);
-            let sectionText;
-            if (nextSectionIndex !== -1) {
-                sectionText = responseText.substring(startIndex + startMarker.length, nextSectionIndex);
-            } else {
-                sectionText = responseText.substring(startIndex + startMarker.length);
-            }
-            return sectionText.trim();
-        }
-
-        // --- イベントリスナー ---
-
-        nextBtn.addEventListener('click', () => {
-            userAnswers[currentQuestionIndex] = answerEl.value;
-            if (currentQuestionIndex < questions.length - 1) {
-                currentQuestionIndex++;
-                displayQuestion();
-                answerEl.focus();
-            } else {
-                showResults();
-            }
-        });
-
-        backBtn.addEventListener('click', () => {
-            if (currentQuestionIndex > 0) {
-                userAnswers[currentQuestionIndex] = answerEl.value;
-                currentQuestionIndex--;
-                displayQuestion();
-            }
-        });
-        
-        copyPromptBtn.addEventListener('click', () => {
-            const promptText = magicPromptEl.textContent + allAnswersEl.textContent;
-            copyToClipboard(promptText, copyPromptBtn);
-        });
-
-        renderChartBtn.addEventListener('click', () => {
-            const aiResponse = aiResponseInput.value;
-            if (!aiResponse) {
-                showMessage('分析結果を貼り付けてください。');
-                return;
-            }
-            const userRegex = /\[RADAR_CHART_DATA\](.*?)\[\/RADAR_CHART_DATA\]/;
-            const averageRegex = /\[RADAR_CHART_AVERAGE\](.*?)\[\/RADAR_CHART_AVERAGE\]/;
-            
-            const userMatch = aiResponse.match(userRegex);
-            const averageMatch = aiResponse.match(averageRegex);
-
-            if (userMatch && userMatch[1] && averageMatch && averageMatch[1]) {
-                const userData = parseChartData(userMatch[1]);
-                const averageData = parseChartData(averageMatch[1]);
-
-                if (userData && averageData) {
-                    renderRadarChart(userData, averageData);
-                    
-                    const analysisText = extractAnalysisSection(aiResponse, "レーダーチャート分析");
-                    if(analysisText) {
-                        chartAnalysisText.textContent = analysisText;
-                        chartAnalysisArea.classList.remove('hidden');
-                        chartAnalysisArea.classList.add('fade-in');
-                    } else {
-                        chartAnalysisArea.classList.add('hidden');
-                    }
-                    
-                    showMessage('チャートと分析が反映されました！', 'success');
-                } else {
-                    showMessage('チャートデータの形式が正しくありません。');
-                }
-            } else {
-                showMessage('AIの回答からチャートデータが見つかりませんでした。');
-            }
-        });
-
-        // --- 初期化 ---
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                loaderScreen.style.opacity = '0';
-                mainContent.style.opacity = '1';
-                setTimeout(() => {
-                    loaderScreen.style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                }, 700);
-            }, 1500); // 1.5秒間ローディング画面を表示
-            displayQuestion();
-        });
-    </script>
+    // --- 初期化 ---
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        loaderScreen.style.opacity = '0';
+        mainContent.style.opacity = '1';
+        setTimeout(() => { loaderScreen.style.display = 'none'; document.body.style.overflow = 'auto'; }, 700);
+      }, 1200);
+      displayQuestion();
+    });
+  </script>
 </body>
 </html>

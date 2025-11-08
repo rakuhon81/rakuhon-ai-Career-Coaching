@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>購入者様専用ページ</title>
+    <meta name="robots" content="noindex">
+
+    <style>
+        body { font-family: sans-serif; text-align: center; padding-top: 50px; background-color: #f4f4f4; }
+        div { background-color: white; border-radius: 8px; padding: 20px; max-width: 400px; margin: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        input { font-size: 1.1em; padding: 10px; width: 80%; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; }
+        button { font-size: 1.1em; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+
+    <div>
+        <h2>購入者様専用 合言葉入力</h2>
+        <p>ご購入時にお伝えした「合言葉」を入力してください。</p>
+
+        <input type="password" id="password_input" placeholder="合言葉...">
+
+        <button onclick="checkPassword()">認証する</button>
+    </div>
+
+    <script>
+        function checkPassword() {
+            // 1. 正しい合言葉（パスワード）をここで決める
+            const correctPassword = "rakuhon2025"; // ← お好きな合言葉に変更してください
+
+            // 2. 秘密の「診断アプリ本体」のURLをここで指定する
+            const secretAppUrl = "https://rakuhon81.github.io/rakuhon-ai-Career-Coaching/"; // ← あなたの診断アプリ本体のURLです
+
+            // 3. 入力された内容を取得
+            const inputText = document.getElementById("password_input").value;
+
+            // 4. もし合言葉が正しければ...
+            if (inputText === correctPassword) {
+                // 秘密のアプリのページに転送（リダイレクト）する
+                alert("認証しました。アプリページへ移動します。");
+                window.location.href = secretAppUrl;
+            } else {
+                // もし間違っていれば...
+                alert("合言葉が間違っています。");
+            }
+        }
+    </script>
+    </body>
+</html>
